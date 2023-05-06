@@ -1,7 +1,43 @@
 import React from "react";
 import { Box, Button, Typography, Skeleton } from "@mui/material";
 
-const Result = ({ loading, imageUrl, ref }) => {
+const Result = ({
+  loading,
+  imageUrl,
+  resultUrl,
+  fileId,
+  handleImageSelect,
+}) => {
+  async function downloadImage() {
+    // Replace the URL with the URL of the image you want to download
+    const dlUrl = `${resultUrl}`;
+
+    // Send a GET request for the image
+    fetch(dlUrl)
+      .then((response) => response.blob())
+      .then((blob) => {
+        // Create a temporary anchor element to download the image
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "image.jpg");
+
+        // Add the anchor element to the DOM and click it to start the download
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+      });
+    console.log(fileId);
+    const res = await fetch(`http://127.0.0.1:5000/delete?filename=${fileId}`, {
+      method: "post",
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
+    const data = await res.text();
+    console.log(data);
+  }
+
   return (
     <Box display={"flex"} flexDirection={"column"} alignItems={"center"}>
       <Typography
@@ -30,23 +66,29 @@ const Result = ({ loading, imageUrl, ref }) => {
             variant="rectangle"
           />
         ) : (
-          <img src={imageUrl} alt="result-image" className="image" />
+          <img src={`${resultUrl}`} alt="result-image" className="image" />
         )}
       </Box>
       {!loading && (
         <Box>
+          {/* <a
+            href={}
+            download
+            onClick={(e) => e.stopPropagation()}
+          > */}
           <Button
             variant="contained"
             sx={{ marginBottom: "10px", marginTop: "10px", mr: 2 }}
             size="large"
+            onClick={downloadImage}
           >
             Download
           </Button>
+          {/* </a> */}
           <Button
             variant="contained"
             sx={{ marginBottom: "10px", marginTop: "10px" }}
             size="large"
-            onClick={() => ref.current.click()}
           >
             Upload
           </Button>
